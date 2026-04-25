@@ -303,7 +303,7 @@ export function truncateFloat(
       return lValue;
     }
   }
-  if (lValue !== null && typeof lValue === 'number' && !Number.isInteger(lValue)) {
+  if (lValue !== null && typeof lValue === 'number' && (precision !== undefined || !Number.isInteger(lValue))) {
     lValue = (lValue as number).toFixed(precision === undefined ? DEFAULT_FLOAT_PRECISION : precision);
   }
   return lValue;
@@ -324,6 +324,7 @@ export function myFormatNumber(
   }
   return formatNumber(lValue, localeOptions, {
     maximumFractionDigits: precision === undefined ? DEFAULT_FLOAT_PRECISION : precision,
+    minimumFractionDigits: precision !== undefined ? precision : undefined,
   });
 }
 
