@@ -46,6 +46,7 @@ export function getLayoutConfig(
     },
     grid: {
       borderColor: resolveColor('var(--divider-color)'),
+      xaxis: { lines: { show: true } },
     },
     fill: {
       opacity: getFillOpacity(config, false),
