@@ -569,12 +569,10 @@ class ChartsCard extends LitElement {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this._yAxisConfig![idx].series_id! = [serieIndex];
       }
-      // Auto-color axis labels from the first series mapped to this axis.
-      // Runs before apex_config merge so apex_config.labels.style.colors can still override.
+      // Store the raw series color for auto-labelling (resolved at render time, not here,
+      // so CSS variables are resolved against the live DOM rather than at config time).
       if (!burned[idx] && serie.color) {
-        yAxisDup = mergeDeep(yAxisDup, {
-          labels: { style: { colors: computeColor(serie.color) } },
-        });
+        yAxisDup._autoLabelColor = serie.color;
       }
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (config.yaxis![idx].apex_config) {
@@ -1020,6 +1018,14 @@ class ChartsCard extends LitElement {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const currentMax = (this._apexChart as any).axes?.w?.globals?.maxX;
       this._headerState = [...this._headerState];
+      // Resolve deferred axis label colors from _autoLabelColor (set in _generateYAxisConfig).
+      // Done here so CSS variables resolve against the live DOM, not at config-set time.
+      (this._config.apex_config?.yaxis as any[] | undefined)?.forEach((yaxis) => {
+        if (yaxis._autoLabelColor && !yaxis.labels?.style?.colors) {
+          const resolved = computeColor(yaxis._autoLabelColor);
+          yaxis.labels = mergeDeep(yaxis.labels || {}, { style: { colors: resolved } });
+        }
+      });
       const chartUpdates: Promise<void>[] = [];
       chartUpdates.push(
         this._apexChart?.updateOptions(
