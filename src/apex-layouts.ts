@@ -87,6 +87,7 @@ export function getLayoutConfig(
       dashArray: getStrokeDash(config, false),
     },
     markers: {
+      strokeWidth: 0,
       showNullDataPoints: false,
     },
     noData: {
@@ -173,6 +174,7 @@ export function getBrushLayoutConfig(
       dashArray: getStrokeDash(config, false),
     },
     markers: {
+      strokeWidth: 0,
       showNullDataPoints: false,
     },
     noData: {
