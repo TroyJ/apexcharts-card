@@ -569,6 +569,8 @@ class ChartsCard extends LitElement {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this._yAxisConfig![idx].series_id! = [serieIndex];
       }
+      // Default label style matching HA chart standard (12px, overrideable via apex_config).
+      yAxisDup = mergeDeep(yAxisDup, { labels: { style: { fontSize: '12px' } } });
       // Store the raw series color for auto-labelling (resolved at render time, not here,
       // so CSS variables are resolved against the live DOM rather than at config time).
       if (!burned[idx] && serie.color) {
