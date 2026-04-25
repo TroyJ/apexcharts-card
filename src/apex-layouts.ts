@@ -11,7 +11,7 @@ import {
   TIMESERIES_TYPES,
 } from './const';
 import { ChartCardConfig } from './types';
-import { computeColor, computeName, computeUom, is12Hour, mergeDeep, myFormatNumber, prettyPrintTime } from './utils';
+import { computeColor, computeName, computeUom, is12Hour, mergeDeep, myFormatNumber, prettyPrintTime, resolveColor } from './utils';
 import { layoutMinimal } from './layouts/minimal';
 import { getLocales, getDefaultLocale } from './locales';
 import GraphEntry from './graphEntry';
@@ -45,8 +45,7 @@ export function getLayoutConfig(
       },
     },
     grid: {
-      strokeDashArray: 3,
-      borderColor: computeColor('var(--divider-color)'),
+      borderColor: resolveColor('var(--divider-color)'),
     },
     fill: {
       opacity: getFillOpacity(config, false),
@@ -143,8 +142,7 @@ export function getBrushLayoutConfig(
       },
     },
     grid: {
-      strokeDashArray: 3,
-      borderColor: computeColor('var(--divider-color)'),
+      borderColor: resolveColor('var(--divider-color)'),
     },
     fill: {
       opacity: getFillOpacity(config, true),

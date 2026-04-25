@@ -110,6 +110,19 @@ export function computeColor(color: string): string {
   }
 }
 
+// Like computeColor but returns the raw resolved value without TinyColor conversion,
+// preserving rgba() alpha. Use this when passing colors directly to ApexCharts
+// properties that accept any CSS color string (e.g. grid.borderColor).
+export function resolveColor(color: string): string {
+  if (color.substring(0, 3) === 'var') {
+    return (
+      window.getComputedStyle(document.documentElement).getPropertyValue(color.substring(4).slice(0, -1)).trim() ||
+      color
+    );
+  }
+  return color;
+}
+
 export function computeTextColor(backgroundColor: string): string {
   const colorObj = new TinyColor(backgroundColor);
   if (colorObj.isValid && colorObj.isLight()) {
