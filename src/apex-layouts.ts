@@ -226,7 +226,7 @@ function getXAxis(config: ChartCardConfig, hass: HomeAssistant | undefined) {
         datetimeFormatter: getDateTimeFormatter(hours12),
       },
       axisTicks: { show: false },
-      axisBorder: { show: true, color: resolveColor('var(--divider-color)') },
+      axisBorder: { show: false },
       crosshairs: { show: false },
     };
   } else {
