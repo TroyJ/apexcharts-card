@@ -1289,6 +1289,20 @@ class ChartsCard extends LitElement {
             max = elt.max[1];
           }
         });
+        // Snap min/max to integer multiples of step_size and derive tickAmount.
+        // Locks major grid lines to clean values (e.g. 23,24,25,26,27 for step_size=1)
+        // and lets the axis overshoot the data range as needed.
+        let derivedTickAmount: number | undefined;
+        if (yaxis.step_size !== undefined && yaxis.step_size > 0 && min !== null && max !== null) {
+          const s = yaxis.step_size;
+          if (yaxis.min_type !== minmax_type.FIXED) {
+            min = Math.floor(min / s) * s;
+          }
+          if (yaxis.max_type !== minmax_type.FIXED) {
+            max = Math.ceil(max / s) * s;
+          }
+          derivedTickAmount = Math.round((max - min) / s);
+        }
         if (yaxis.align_to !== undefined) {
           if (min !== null && yaxis.min_type !== minmax_type.FIXED) {
             if (min % yaxis.align_to !== 0) {
@@ -1351,6 +1365,10 @@ class ChartsCard extends LitElement {
           }
         }
         yaxis.series_id?.forEach((id) => {
+          if (derivedTickAmount !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            this._config!.apex_config!.yaxis![id].tickAmount = derivedTickAmount;
+          }
           if (min !== null && yaxis.min_type !== minmax_type.FIXED) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this._config!.apex_config!.yaxis![id].min = this._getMinMaxBasedOnType(
