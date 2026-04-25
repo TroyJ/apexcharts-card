@@ -488,6 +488,33 @@ class ChartsCard extends LitElement {
           }
         }
         if (this._config.yaxis) {
+          this._config.yaxis.forEach((yaxis, idx) => {
+            if (yaxis.align_to_master === undefined) return;
+            if (yaxis.align_to === undefined) {
+              throw new Error(`yaxis '${yaxis.id}': align_to_master requires align_to to be set.`);
+            }
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const masterIdx = this._config!.yaxis!.findIndex((y) => y.id === yaxis.align_to_master);
+            if (masterIdx < 0) {
+              throw new Error(
+                `yaxis '${yaxis.id}': align_to_master '${yaxis.align_to_master}' does not reference any yaxis.`,
+              );
+            }
+            if (masterIdx >= idx) {
+              throw new Error(
+                `yaxis '${yaxis.id}': master '${yaxis.align_to_master}' must be declared before dependent axes.`,
+              );
+            }
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const masterStep = this._config!.yaxis![masterIdx].apex_config?.stepSize;
+            if (typeof masterStep !== 'number' || masterStep <= 0) {
+              throw new Error(
+                `yaxis '${yaxis.id}': align_to_master requires master '${yaxis.align_to_master}' to define apex_config.stepSize as a positive number.`,
+              );
+            }
+          });
+        }
+        if (this._config.yaxis) {
           const yAxisConfig = this._generateYAxisConfig(this._config);
           if (this._config.apex_config) {
             this._config.apex_config.yaxis = yAxisConfig;
@@ -1251,6 +1278,51 @@ class ChartsCard extends LitElement {
           if (max !== null && yaxis.max_type !== minmax_type.FIXED) {
             if (max % yaxis.align_to !== 0) {
               max = max >= 0 ? yaxis.align_to - (max % yaxis.align_to) + max : (max % yaxis.align_to) - max;
+            }
+          }
+        }
+        // align_to_master: enforce same number of grid lines as the master axis,
+        // labels at multiples of align_to. Master must precede this axis (validated in setConfig)
+        // and have apex_config.stepSize set, so its computed min/max are already in apex_config.yaxis.
+        if (
+          yaxis.align_to_master !== undefined &&
+          yaxis.align_to !== undefined &&
+          min !== null &&
+          max !== null &&
+          yaxis.min_type !== minmax_type.FIXED &&
+          yaxis.max_type !== minmax_type.FIXED
+        ) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const masterCfg = this._yAxisConfig!.find((y) => y.id === yaxis.align_to_master);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const masterSeriesId = masterCfg?.series_id?.[0];
+          if (masterCfg && masterSeriesId !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const masterApex = this._config!.apex_config!.yaxis![masterSeriesId];
+            const masterMin = masterApex?.min as number | undefined;
+            const masterMax = masterApex?.max as number | undefined;
+            const masterStep = masterCfg.apex_config?.stepSize as number | undefined;
+            if (
+              typeof masterMin === 'number' &&
+              typeof masterMax === 'number' &&
+              typeof masterStep === 'number' &&
+              masterStep > 0
+            ) {
+              const N = Math.round((masterMax - masterMin) / masterStep) + 1;
+              if (N >= 2) {
+                const dataRange = max - min;
+                let step = yaxis.align_to;
+                while (step * (N - 1) < dataRange) {
+                  step += yaxis.align_to;
+                }
+                // min already snapped down to multiple of align_to by the block above
+                max = min + step * (N - 1);
+                // force tickAmount on each series ApexYAxis entry below
+                yaxis.series_id?.forEach((id) => {
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  this._config!.apex_config!.yaxis![id].tickAmount = N - 1;
+                });
+              }
             }
           }
         }

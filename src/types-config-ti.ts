@@ -164,6 +164,7 @@ export const ChartCardYAxisExternal = t.iface([], {
   "min": t.opt(t.union(t.lit('auto'), "number", "string")),
   "max": t.opt(t.union(t.lit('auto'), "number", "string")),
   "align_to": t.opt("number"),
+  "align_to_master": t.opt("string"),
   "decimals": t.opt("number"),
   "apex_config": t.opt("any"),
 });

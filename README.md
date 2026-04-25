@@ -528,6 +528,42 @@ You can have as many y-axis as there are series defined in your configuration or
 | `decimals` | number | `1` | v1.10.0 | Number of decimals to show on this y-axis |
 | `apex_config` | object | | v1.9.0 | Any configuration from https://apexcharts.com/docs/options/yaxis/, except `min`, `max`, `show` and `opposite` |
 | `align_to` | number | | v1.10.0 | Aligns the yaxis extremas to the closest multiple of `align_to`. Only valid if `min` or `max` are not fixed values. |
+| `align_to_master` | string | | TroyJ-fork | References another yaxis by `id`. The dependent axis is constrained to the same number of grid lines as the master, with labels snapped to multiples of `align_to`. Requires the master to define `apex_config.stepSize`. The master must appear earlier in the `yaxis` array than any dependent axis. *(Fork-specific feature, not in upstream.)* |
+
+#### Linked dual-axis alignment (`align_to_master`)
+
+When you have two y-axes with unrelated units (e.g. temperature on the left and humidity on the right), each axis would normally choose its own tick positions, producing mismatched horizontal grid lines. Setting `align_to_master` on the dependent axis tells the card to:
+
+1. Read the master axis's computed min/max and `stepSize` to determine its tick count `N`.
+2. Snap the dependent axis's autoscaled min down to the nearest multiple of `align_to`.
+3. Set the dependent axis's max so the range is exactly `(N - 1) × step`, where `step` is the smallest multiple of `align_to` that fits the data.
+4. Force `tickAmount = N - 1` on the dependent axis so ApexCharts produces N grid lines.
+
+The result: both axes have the same N grid lines at the same vertical positions, the master is fully autoscaled, and the dependent axis's labels are always at multiples of `align_to`.
+
+```yaml
+type: custom:apexcharts-card
+graph_span: 24h
+yaxis:
+  - id: temp
+    decimals: 0
+    apex_config:
+      stepSize: 1                 # required for the master
+      forceNiceScale: true
+      decimalsInFloat: 0
+  - id: humidity
+    opposite: true
+    decimals: 0
+    align_to: 5                   # snap to multiples of 5%
+    align_to_master: temp         # match temp's grid lines
+    apex_config:
+      decimalsInFloat: 0
+series:
+  - entity: sensor.office_temperature
+    yaxis_id: temp
+  - entity: sensor.office_humidity
+    yaxis_id: humidity
+```
 
 #### Min/Max Format
 
