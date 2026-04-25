@@ -569,6 +569,13 @@ class ChartsCard extends LitElement {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this._yAxisConfig![idx].series_id! = [serieIndex];
       }
+      // Auto-color axis labels from the first series mapped to this axis.
+      // Runs before apex_config merge so apex_config.labels.style.colors can still override.
+      if (!burned[idx] && serie.color) {
+        yAxisDup = mergeDeep(yAxisDup, {
+          labels: { style: { colors: computeColor(serie.color) } },
+        });
+      }
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (config.yaxis![idx].apex_config) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
