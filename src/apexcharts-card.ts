@@ -1023,9 +1023,14 @@ class ChartsCard extends LitElement {
       // Resolve deferred axis label colors from _autoLabelColor (set in _generateYAxisConfig).
       // Done here so CSS variables resolve against the live DOM, not at config-set time.
       (this._config.apex_config?.yaxis as any[] | undefined)?.forEach((yaxis) => {
-        if (yaxis._autoLabelColor && !yaxis.labels?.style?.colors) {
+        if (yaxis._autoLabelColor) {
           const resolved = computeColor(yaxis._autoLabelColor);
-          yaxis.labels = mergeDeep(yaxis.labels || {}, { style: { colors: resolved } });
+          if (!yaxis.labels?.style?.colors) {
+            yaxis.labels = mergeDeep(yaxis.labels || {}, { style: { colors: resolved } });
+          }
+          if (!yaxis.title?.style?.color) {
+            yaxis.title = mergeDeep(yaxis.title || {}, { style: { color: resolved } });
+          }
         }
       });
       const chartUpdates: Promise<void>[] = [];
