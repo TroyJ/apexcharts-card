@@ -18,6 +18,7 @@ import * as pjson from '../package.json';
 import {
   computeColor,
   computeColors,
+  resolveColor,
   computeName,
   computeTextColor,
   computeUom,
@@ -569,8 +570,14 @@ class ChartsCard extends LitElement {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this._yAxisConfig![idx].series_id! = [serieIndex];
       }
-      // Default label style matching HA chart standard (12px, overrideable via apex_config).
-      yAxisDup = mergeDeep(yAxisDup, { labels: { style: { fontSize: '12px' } } });
+      // Default y-axis styling to match HA chart standard (overrideable via apex_config).
+      // axisBorder: hide the solid vertical line ApexCharts draws along the y-axis by default.
+      // axisTicks: keep ticks but color them with --divider-color so they blend with grid lines.
+      yAxisDup = mergeDeep(yAxisDup, {
+        labels: { style: { fontSize: '12px' } },
+        axisBorder: { show: false },
+        axisTicks: { color: resolveColor('var(--divider-color)') },
+      });
       // Store the raw series color for auto-labelling (resolved at render time, not here,
       // so CSS variables are resolved against the live DOM rather than at config time).
       if (!burned[idx] && serie.color) {
