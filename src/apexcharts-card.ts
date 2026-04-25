@@ -18,6 +18,7 @@ import * as pjson from '../package.json';
 import {
   computeColor,
   computeColors,
+  resolveColor,
   computeName,
   computeTextColor,
   computeUom,
@@ -1033,6 +1034,18 @@ class ChartsCard extends LitElement {
           }
         }
       });
+      // Add vertical grid lines at the start and end of the time window.
+      // The x-axis tick marks only appear at even-hour intervals, leaving no lines at the edges.
+      if (TIMESERIES_TYPES.includes(this._config.chart_type)) {
+        const borderColor = resolveColor('var(--divider-color)');
+        const offset = this._serverTimeOffset;
+        graphData.annotations = mergeDeep(graphData.annotations || {}, {
+          xaxis: [
+            { x: start.getTime() - offset, borderColor, borderWidth: 1, strokeDashArray: 0 },
+            { x: end.getTime() - offset, borderColor, borderWidth: 1, strokeDashArray: 0 },
+          ],
+        });
+      }
       const chartUpdates: Promise<void>[] = [];
       chartUpdates.push(
         this._apexChart?.updateOptions(
