@@ -227,6 +227,7 @@ function getXAxis(config: ChartCardConfig, hass: HomeAssistant | undefined) {
       },
       axisTicks: { show: false },
       axisBorder: { show: true, color: resolveColor('var(--divider-color)') },
+      crosshairs: { show: false },
     };
   } else {
     return {};
