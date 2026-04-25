@@ -506,10 +506,10 @@ class ChartsCard extends LitElement {
               );
             }
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const masterStep = this._config!.yaxis![masterIdx].apex_config?.stepSize;
+            const masterStep = this._config!.yaxis![masterIdx].step_size;
             if (typeof masterStep !== 'number' || masterStep <= 0) {
               throw new Error(
-                `yaxis '${yaxis.id}': align_to_master requires master '${yaxis.align_to_master}' to define apex_config.stepSize as a positive number.`,
+                `yaxis '${yaxis.id}': align_to_master requires master '${yaxis.align_to_master}' to define step_size as a positive number.`,
               );
             }
           });
@@ -1316,14 +1316,18 @@ class ChartsCard extends LitElement {
             const masterApex = this._config!.apex_config!.yaxis![masterSeriesId];
             const masterMin = masterApex?.min as number | undefined;
             const masterMax = masterApex?.max as number | undefined;
-            const masterStep = masterCfg.apex_config?.stepSize as number | undefined;
+            const masterStep = masterCfg.step_size as number | undefined;
             if (
               typeof masterMin === 'number' &&
               typeof masterMax === 'number' &&
               typeof masterStep === 'number' &&
               masterStep > 0
             ) {
-              const N = Math.round((masterMax - masterMin) / masterStep) + 1;
+              // If master has explicit tickAmount, use it so align_to_master tracks the user's setting.
+              const masterExplicitTickAmount = masterApex?.tickAmount as number | undefined;
+              const N = masterExplicitTickAmount !== undefined
+                ? masterExplicitTickAmount + 1
+                : Math.round((masterMax - masterMin) / masterStep) + 1;
               if (N >= 2) {
                 const dataRange = max - min;
                 let step = yaxis.align_to;
